@@ -49,6 +49,11 @@ If you only need a few tags, you can assign a variable with only the groups you 
 $this->smarty->assign('tags', array('tabs', 'panel'));
 ```
 
+If you want to integrate the color fields in your form, do not forget to call the PrestaShop jQuery plugin as well:
+
+``` php
+$this->context->controller->addJqueryPlugin('colorpicker');
+```
 ## Available tags
 
 All available tags and their attributes are listed on the [wiki](../../wiki)
