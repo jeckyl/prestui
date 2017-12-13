@@ -1,7 +1,7 @@
 {*
 *	The MIT License (MIT)
 *
-*	Copyright (c) 2015 Emmanuel MARICHAL
+*	Copyright (c) 2015-2017 Emmanuel MARICHAL
 *
 *	Permission is hereby granted, free of charge, to any person obtaining a copy
 *	of this software and associated documentation files (the "Software"), to deal
@@ -24,48 +24,52 @@
 
 <script type="riot/tag">
 
-	<ps-tab>
+    <ps-tab>
 
-		<ps-panel>
-			<yield/>
-		</ps-panel>
+        <ps-panel if={ opts.panel != 'false' } icon="{ this.icon }"  header="{ this.header }" img="{ opts.img }" fa="{ opts.fa }">
+            <yield/>
+        </ps-panel>
 
-		{if $ps_version >= 1.6}
+        <div if={ opts.panel == 'false' }>
+            <yield />
+        </div>
 
-			<style scoped>
+        {if $ps_version >= 1.6}
 
-				.panel {
-				  border-top-left-radius: 0 !important;
-					border-top-right-radius: 0 !important;
-				}
+            <style scoped>
 
-			</style>
+                .panel {
+                    border-top-left-radius: 0 !important;
+                    border-top-right-radius: 0 !important;
+                }
 
-		{else}
+            </style>
 
-			<style scoped>
+        {else}
 
-				:scope {
-					display: none;
-				}
+            <style scoped>
 
-				:scope.active {
-					display: block;
-				}
+                :scope {
+                    display: none;
+                }
 
-			</style>
+                :scope.active {
+                    display: block;
+                }
 
-		{/if}
+            </style>
 
-		$(this.root).addClass('tab-pane')
-		if (this.parent && this.parent.opts.position == 'left')
-		{
-			this.tags['ps-panel'].opts.header = opts.title
-			this.tags['ps-panel'].opts.icon = opts.icon
-			this.tags['ps-panel'].opts.img = opts.img
-		}
+        {/if}
 
-	</ps-tab>
+        if (this.parent && this.parent.opts.position != 'top') {
+            this.header = opts.label;
+            this.icon = opts.icon;
+        }
+        $(this.root).addClass('tab-pane')
+        if (this.opts.active == 'true')
+            $(this.root).addClass('active')
+
+    </ps-tab>
 
 </script>
 
@@ -73,163 +77,215 @@
 
   <ps-tabs>
 
-		{if $ps_version >= 1.6}
+        {if $ps_version >= 1.6}
 
-			<div class="row">
+            <div class="row">
 
-				<div class="{ col-md-2: this.opts.position == 'left', col-md-12: this.opts.position != 'left' }">
-					<ul class="{ nav: true, list-group: this.opts.position == 'left', nav-tabs: this.opts.position != 'left' }">
-						<li class="{ list-group-item: this.parent.opts.position == 'left', active: tab.opts.active }" each={ tab in this.tags['ps-tab'] }>
-							<a href="#{ tab.opts.id }" data-toggle="tab"><i class="{ tab.opts.icon }" if={ tab.opts.icon }></i> { tab.opts.title }</a>
-						</li>
-					</ul>
-				</div>
+                <div class="{ col-md-2: this.opts.position == 'left', col-md-12: this.opts.position != 'left' }">
+                    <ul class="{ nav: true, list-group: this.opts.position == 'left', nav-tabs: this.opts.position != 'left' }">
+                        <li class="{ list-group-item: this.parent.opts.position == 'left', active: tab.opts.active == 'true' }" each={ tab in this.tabs }>
+                            <a href="#{ tab.opts.id }" data-toggle="tab"><i class="{ tab.opts.icon }" if={ tab.opts.icon }></i> { tab.opts.label } <span if={ tab.opts.badge } class="badge pull-right">{ tab.opts.badge }</span></a>
+                        </li>
+                    </ul>
+                </div>
 
-				<div class="{ tab-content: true, col-md-10: this.opts.position == 'left', col-md-12: this.opts.position != 'left' }">
-					<yield/>
-				</div>
+                <div class="{ tab-content: true, col-md-10: this.opts.position == 'left', col-md-12: this.opts.position != 'left' }">
+                    <yield/>
+                </div>
 
-				<div class="clearfix"></div>
-			</div>
+                <div class="clearfix"></div>
+            </div>
 
-		{else}
+        {else}
 
-			<div class="tabs-container">
+            <div class="tabs-container">
 
-				<ul class="{ tabs-navigation: true, tabs-navigation-left: this.opts.position == 'left', tabs-navigation-top: this.opts.position != 'left' }">
-						<li each={ tab in this.tags['ps-tab'] } class={ active: tab.opts.active }>
-							<a href="#{ tab.opts.id }" onclick={ changeTab }><img src="{ tab.opts.img }" if={ tab.opts.img } /> { tab.opts.title }</a>
-						</li>
-				</ul>
+                <ul class="{ tabs-navigation: true, tabs-navigation-left: this.opts.position == 'left', tabs-navigation-top: this.opts.position != 'left' }">
+                        <li each={ tab in this.tabs } class={ active: tab.opts.active == 'true' }>
+                            <a href="#{ tab.opts.id }" onclick={ changeTab }>
+                            <img src="{ tab.opts.img }" if={ !tab.opts.fa } /><i class="fa fa-{ tab.opts.fa }" if={ tab.opts.fa }></i> { tab.opts.label } <span if={ tab.opts.badge } class="badge pull-right">{ tab.opts.badge }</span>
+                            </a>
+                        </li>
+                </ul>
 
-				<div class="{ tabs-content: true, tabs-content-left: this.opts.position == 'left', tabs-content-top: this.opts.position != 'left' }">
-					<yield/>
-				</div>
+                <div class="{ tabs-content: true, tabs-content-left: this.opts.position == 'left', tabs-content-top: this.opts.position != 'left' }">
+                    <yield/>
+                </div>
 
-				<div class="clearfix"></div>
+                <div class="clearfix"></div>
 
-			</div>
+            </div>
 
-		{/if}
+        {/if}
 
-		this.on('mount', function() {
-			that = this
-			that.tags['ps-tab'].forEach(function(elem) {
-				if (elem.opts.active)
-					$(elem.root).addClass('active')
-			})
-		})
+        this.on('mount', function() {
+            this.tabs = this.tags['ps-tab'];
+            this.update();
+        })
 
-		changeTab(event) {
-			$(event.target).parents('ul.tabs-navigation').find('li.active').removeClass('active')
-			$(event.target).parents('li').addClass('active')
-			$(event.target).parents('.tabs-container').find('ps-tab.active').removeClass('active')
-			var target = $(event.target).parents('li').find('a').attr('href')
-			$(event.target).parents('.tabs-container').find('ps-tab'+target).addClass('active')
-			return false
-		}
+        // Only PS 1.5
+        changeTab(event) {
+            // Change active tab
+            $(this.root).find('> .tabs-container > ul > li.active').removeClass('active')
+            $(event.target).closest('li').addClass('active')
 
-		{if $ps_version >= 1.6}
+            // Change active tab content
+            $(this.root).find('> .tabs-container > .tabs-content > .active').removeClass('active')
+            id_target = $(event.target).closest('a').attr('href')
+            $(this.root).find('> .tabs-container > .tabs-content > ' + id_target).addClass('active')
 
-			<style scoped>
+            event.preventDefault();
 
-				li.list-group-item {
-					padding: 0 !important;
-				}
+            return false
+        }
 
-				li.list-group-item a {
-					color: #555;
-				}
+        {if $ps_version >= 1.6}
 
-				li.list-group-item:hover {
-					background-color: #f5f5f5;
-				}
+            <style scoped>
 
-				li.list-group-item.active a {
-					color: white;
-				}
+                li.list-group-item {
+                    padding: 0 !important;
+                }
 
-			</style>
+                li.list-group-item a {
+                    color: #555;
+                }
 
-		{else}
+                li.list-group-item:hover {
+                    background-color: #f5f5f5;
+                }
 
-			<style scoped>
+                li.list-group-item.active a {
+                    color: white;
+                }
 
-				.tabs-container {
-					margin: 20px 0;
-				}
+                .nav.list-group li a {
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    overflow: hidden;
+                }
 
-				.tabs-content-left {
-					margin-left: 200px;
-				}
+                .nav li a .badge {
+                    margin-top: -3px;
+                    margin-left: 5px;
+                }
 
-				.tabs-navigation li {
-					background: #fafafa;
-				}
+                .nav.list-group li a .badge {
+                    position: absolute;
+                    right: 8px;
+                    top: 12px;
+                }
 
-				.tabs-navigation li:hover {
-					background: #F1F3F9;
-				}
+            </style>
 
-				.tabs-navigation li a {
-					color: #666;
-					cursor: pointer;
-					padding: 10px 15px;
-					display: block;
-					line-height: 18px;
-				}
+        {else}
 
-				.tabs-navigation li a img {
-					margin-top: -4px;
-					max-width: 16px;
-					max-height: 16px;
-				}
+            <style scoped>
 
-				.tabs-navigation li.active {
-					background: #EBEDF4;
-				}
+                .tabs-container {
+                    margin: 20px 0;
+                }
 
-				.tabs-navigation li.active a {
-					color: black;
-					font-weight: bold;
-				}
+                .tabs-content-left {
+                    margin-left: 200px;
+                }
 
-				.tabs-navigation.tabs-navigation-top {
-					margin-bottom: -1px;
-				}
+                .tabs-navigation li {
+                    background: #fafafa;
+                }
 
-				.tabs-navigation.tabs-navigation-top li {
-					border: 1px solid #CCCED7;
-					border-right: none;
-					display: inline-block;
-				}
+                .tabs-navigation li:hover {
+                    background: #F1F3F9;
+                }
 
-				.tabs-navigation.tabs-navigation-top li.active {
-					border-bottom: 1px solid #EBEDF4;
-				}
+                .tabs-navigation li a {
+                    color: #666;
+                    cursor: pointer;
+                    padding: 10px 15px;
+                    display: block;
+                    line-height: 18px;
+                }
 
-				.tabs-navigation.tabs-navigation-top li:last-child {
-					border-right: 1px solid #CCCED7;
-				}
+                .tabs-navigation li a img {
+                    margin-top: -4px;
+                    max-width: 16px;
+                    max-height: 16px;
+                }
 
-				.tabs-navigation.tabs-navigation-left {
-					float: left;
-					border: 1px solid #CCCED7;
-					width: 180px;
-					margin-top: 11px;
-				}
+                .tabs-navigation li a .badge {
+                    background: #EBEDF4;
+                    border: 1px solid #EBEDF4;
+                    padding: 2px 5px;
+                    margin-top: -3px;
+                    margin-right: -5px;
+                    float: right;
+                    margin-left: 10px;
+                }
 
-				.tabs-navigation.tabs-navigation-left li {
-					border-bottom: 1px solid #CCCED7;
-				}
+                .tabs-navigation li.active {
+                    background: #EBEDF4;
+                }
 
-				.tabs-navigation.tabs-navigation-left li:last-child {
-					border-bottom: none;
-				}
+                .tabs-navigation li.active a {
+                    color: black;
+                    font-weight: bold;
+                }
 
-			</style>
+                .tabs-navigation li.active a .badge {
+                    border-color: #CCCED7;
+                    background: #fafafa;
+                }
 
-		{/if}
+                .tabs-navigation.tabs-navigation-top {
+                    margin-bottom: -1px;
+                }
+
+                .tabs-navigation.tabs-navigation-top li {
+                    border: 1px solid #CCCED7;
+                    border-right: none;
+                    display: inline-block;
+                }
+
+                .tabs-navigation.tabs-navigation-top li.active {
+                    border-bottom: 1px solid #EBEDF4;
+                }
+
+                .tabs-navigation.tabs-navigation-top li:last-child {
+                    border-right: 1px solid #CCCED7;
+                }
+
+                .tabs-navigation.tabs-navigation-left {
+                    float: left;
+                    border: 1px solid #CCCED7;
+                    width: 180px;
+                    margin-top: 11px;
+                }
+
+                .tabs-navigation.tabs-navigation-left li {
+                    border-bottom: 1px solid #CCCED7;
+                }
+
+                .tabs-navigation.tabs-navigation-left li:last-child {
+                    border-bottom: none;
+                }
+
+                .tabs-navigation.tabs-navigation-left li a {
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    position: relative;
+                }
+
+                .tabs-navigation.tabs-navigation-left li a .badge {
+                    float: none;
+                    position: absolute;
+                    right: 12px;
+                    top: 10px;
+                }
+
+            </style>
+
+        {/if}
 
   </ps-tabs>
 
